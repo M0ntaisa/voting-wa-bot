@@ -41,6 +41,7 @@ client.on('message', async message => {
       let candidateId = content.split('-').pop();
       const candidates = await database.getCandidates(con);
       const voters = await database.getContactsVoters(con);
+      const already_vote = await database.getAlreadyVote(con);
       const voter = voters.find(voter => voter.no_pemilih === from);
       const unregis = voter !== undefined;
       console.log(unregis);
@@ -49,11 +50,12 @@ client.on('message', async message => {
         return;
       }
 
-      // TODO :: call getIkutVote fn and make condition when hasVoted
-
-      // const hasVoted = candidates.some(candidate => voters.some(voter => voter.no_pemilih === candidate.no_pemilih));
-      // client.sendMessage(message.from, `you've already voted. you can only vote once!`);
+      const hasVoted = candidates.some(candidate => already_vote.some(voter => voter.no_pemilih === candidate.no_pemilih));
       // console.log(hasVoted);
+      if (hasVoted) {
+        client.sendMessage(message.from, `you've already voted. you can only vote once!`);
+        return;
+      }
 
       try {
         if (candidateId > candidates.length) {
